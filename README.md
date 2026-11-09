@@ -1,26 +1,28 @@
 # ProList Player
 
-A simple, reliable HTML player for presentation videos. Open `player.html` from a local folder in Edge, Chrome
-or Firefox; no server or install needed.
+A simple HTML player for presentation videos. It plays a list of local video clips like slides: each clip loops,
+plays once, or moves on by itself, and you step through them with the arrow keys or a presentation clicker.
+No server or install: open `player.html` in Edge, Chrome or Firefox.
 
-## How it works
+## Try the demo
 
-- Put `player.html` (with its `js` and `css` folders) next to your videos, or one folder above them.
-- Add videos by dragging them onto the player, or with **Videos → Import**. The playlist is saved in the browser
-  and stores only file names; videos are found in the player's folder or one subfolder below it.
-- Missing videos can be found with **Locate folder…** or **Locate files…**.
-- **Playlist → Export** saves `playlist.js`. A `playlist.js` next to the player is offered for import when the
-  playlist is empty.
+1. Download or clone this repository.
+2. Open `player.html` in your browser.
+3. Click **Import** when it offers the `playlist.js` it found.
+4. Press **F** for fullscreen, then **→** to start.
 
-Each clip has one of three modes:
+The four demo clips show the three clip modes: Slide 1 loops, the transition moves on by itself, Slide 2 loops,
+and The End plays once and holds its last frame.
 
-| Mode | At the end of the clip |
-|---|---|
-| Loop (default) | Repeats until you press → |
-| Once | Holds the last frame |
-| Trans | Moves on to the next clip by itself |
+## Use your own videos
 
-Switching clips never shows a black frame: the old picture stays on screen until the new clip's first frame is drawn.
+1. Put `player.html` (with its `js` and `css` folders) in the folder with your videos. Videos one folder below
+   also work.
+2. Drag your videos onto the player, or use **Videos → Import**.
+3. Set each clip's mode with its icons: Loop, Once or Trans.
+
+The playlist is saved in the browser. **Playlist → Export** saves it as `playlist.js`, which the player offers to
+import when its playlist is empty. If a video can't be found, use **Locate folder…** or **Locate files…**.
 
 ## Keys
 
@@ -33,4 +35,9 @@ Switching clips never shows a black frame: the old picture stays on screen until
 | F | Fullscreen |
 | Esc | Exit fullscreen |
 
-Presentation clickers usually send PageDown / PageUp, so they work too. Paused stays paused when changing clips.
+Presentation clickers usually send PageDown / PageUp, so they work too.
+
+## More
+
+- [docs/behavior.md](docs/behavior.md): exactly what each key, button and clip mode does.
+- [docs/architecture.md](docs/architecture.md): how the code is organized, and the browser quirks it works around.

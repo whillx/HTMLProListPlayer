@@ -1,4 +1,4 @@
-# Your own videos and exported playlists stay out of the repository
+# Your own videos stay out of the repository; only the demo clips are published
 *.mp4
 *.webm
 *.mov
@@ -6,4 +6,4 @@
 *.mkv
 *.ogv
 *.avi
-playlist.js
+!demo_*.mp4
