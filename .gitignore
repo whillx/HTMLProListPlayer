@@ -1,0 +1,9 @@
+# Your own videos and exported playlists stay out of the repository
+*.mp4
+*.webm
+*.mov
+*.m4v
+*.mkv
+*.ogv
+*.avi
+playlist.js

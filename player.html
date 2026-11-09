@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ProList Player</title>
+<link rel="stylesheet" href="css/player.css">
+</head>
+<body>
+<header id="menubar">
+  <button id="btn-sidebar" class="icon-btn on" title="Show / hide the playlist">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+  </button>
+  <div class="menu">
+    <button class="menu-btn">Playlist</button>
+    <div class="menu-items">
+      <button data-cmd="exportList" data-needs="clips">Export…</button>
+      <button data-cmd="importList">Import…</button>
+      <hr>
+      <button data-cmd="clearList" data-needs="clips">Clear</button>
+    </div>
+  </div>
+  <div class="menu">
+    <button class="menu-btn">Edit</button>
+    <div class="menu-items">
+      <button data-cmd="selectAll" data-needs="clips">Select all</button>
+      <button data-cmd="selectNone" data-needs="selection">Select none</button>
+      <hr>
+      <button data-cmd="setMode" data-arg="loop" data-needs="selection">Set selected to Loop</button>
+      <button data-cmd="setMode" data-arg="once" data-needs="selection">Set selected to Once</button>
+      <button data-cmd="setMode" data-arg="trans" data-needs="selection">Set selected to Trans</button>
+      <hr>
+      <button data-cmd="deleteSelected" data-needs="selection">Delete selected</button>
+    </div>
+  </div>
+  <div class="menu">
+    <button class="menu-btn">Videos</button>
+    <div class="menu-items">
+      <button data-cmd="importVideos">Import videos…</button>
+      <button data-cmd="importFolder">Import folder…</button>
+      <hr>
+      <button data-cmd="locateFolder" data-needs="missing">Locate folder…</button>
+      <button data-cmd="locateFiles" data-needs="missing">Locate files…</button>
+    </div>
+  </div>
+  <div class="menu">
+    <button class="menu-btn">Help</button>
+    <div class="menu-items">
+      <button data-cmd="showKeys">Keys</button>
+      <button data-cmd="showAbout">About</button>
+    </div>
+  </div>
+  <input type="file" id="file-videos" accept="video/*,.mp4,.webm,.mov,.m4v,.mkv,.ogv,.avi" multiple hidden>
+  <input type="file" id="file-folder" webkitdirectory hidden>
+  <input type="file" id="locate-folder" webkitdirectory hidden>
+  <input type="file" id="locate-files" accept="video/*,.mp4,.webm,.mov,.m4v,.mkv,.ogv,.avi" multiple hidden>
+  <input type="file" id="file-import" accept=".js,.json,text/javascript,application/json" hidden>
+</header>
+<div id="banner" class="bar" hidden>
+  This page was opened through the browser sandbox's file portal, so it can't see the files next to it.
+  Give the browser access to this folder (e.g. with Flatseal) and open the HTML file again.
+</div>
+<div id="missingbar" class="bar" hidden>
+  <span id="missing-text"></span>
+  <button id="btn-locate-folder">Locate folder…</button>
+  <button id="btn-locate-files">Locate files…</button>
+</div>
+<main>
+  <section id="side">
+    <ul id="list"></ul>
+    <div id="empty">No videos yet.<br>Drag video files (or a folder) here, or use <b>Videos → Import videos…</b></div>
+  </section>
+  <div id="splitter" title="Drag to resize"></div>
+  <section id="right">
+    <div id="stage">
+      <video id="vA" class="show" preload="auto" playsinline></video>
+      <video id="vB" preload="auto" playsinline></video>
+      <div id="stage-msg"></div>
+      <div id="pause-icon"></div>
+      <div id="controls">
+        <div class="pill">
+          <div class="buttons">
+          <button id="btn-start" class="round" title="Back to the start (first clip, first frame)">
+            <svg viewBox="0 0 24 24"><path d="M5 5h2v14H5zM13 12l7-6v12zM7 12l6-6v12z"/></svg>
+          </button>
+          <span class="sep"></span>
+          <button id="btn-prev" class="round" title="Previous">
+            <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+          </button>
+          <button id="btn-play" class="round big" title="Play / Pause">
+            <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+          <button id="btn-next" class="round" title="Next">
+            <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
+          </button>
+          <span class="sep"></span>
+          <button id="btn-fullscreen" class="round" title="Fullscreen (F)">
+            <svg class="i-enter" viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zM20 4v6h-2V6h-4V4zM4 20v-6h2v4h4v2zM20 20h-6v-2h4v-4h2z"/></svg>
+            <svg class="i-exit" viewBox="0 0 24 24"><path d="M8 4h2v6H4V8h4zM14 4h2v4h4v2h-6zM4 14h6v6H8v-4H4zM14 14h6v2h-4v4h-2z"/></svg>
+          </button>
+          </div>
+          <div class="seekrow">
+            <span id="t-cur" class="time left">0:00</span>
+            <input type="range" id="seek" min="0" max="1000" step="1" value="0" tabindex="-1" title="Seek within the current clip">
+            <span class="right">
+              <span id="t-dur" class="time">0:00</span>
+              <button id="btn-mute" class="vol-btn" tabindex="-1" title="Mute / unmute">
+                <svg class="i-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+                <svg class="i-mute" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zM16 9.4l1.4-1.4 1.6 1.6 1.6-1.6L22 9.4 20.4 11l1.6 1.6-1.4 1.4-1.6-1.6-1.6 1.6-1.4-1.4 1.6-1.6z"/></svg>
+              </button>
+              <input type="range" id="volume" min="0" max="1" step="0.01" value="1" tabindex="-1" title="Volume">
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="bar">
+      <span id="info"></span>
+      <span id="state"></span>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg-keys">
+  <h3>Keys</h3>
+  <table>
+    <tr><td><kbd>→</kbd> <kbd>PageDown</kbd></td><td>Next clip. If the first clip is ready (waiting on its first frame), starts it. During a Trans clip,
+      skips the rest of it. While paused, shows the next clip on its first frame and stays paused.</td></tr>
+    <tr><td><kbd>←</kbd> <kbd>PageUp</kbd></td><td>Previous clip, skipping Trans clips; while paused, stays paused. On the first clip (or when only Trans clips
+      come before it): back to the first frame of the first clip, ready for →.</td></tr>
+    <tr><td><kbd>Space</kbd> or the play / pause button</td><td>Pause or resume.</td></tr>
+    <tr><td>Back-to-start button</td><td>First clip, first frame, paused.</td></tr>
+    <tr><td>Previous / next buttons</td><td>Like ← / →, but they never start the first clip when it is ready: they move to the next clip instead.</td></tr>
+    <tr><td>Seek bar</td><td>Moves within the current clip; playing stays playing, paused stays paused. The first clip,
+      paused and moved back to its first frame, is ready again: → starts it.</td></tr>
+    <tr><td><kbd>&lt;</kbd> / <kbd>&gt;</kbd></td><td>Back / forward 3 seconds in the current clip, like the seek bar. Stops at the first or last frame
+      of the clip.</td></tr>
+    <tr><td>Volume slider / speaker icon</td><td>Sets the volume / mutes and unmutes (remembered).</td></tr>
+    <tr><td><kbd>F</kbd>, fullscreen button, or double-click video</td><td>Toggle fullscreen.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Exit fullscreen.</td></tr>
+  </table>
+  <h3 style="margin-top:16px">What happens at the end of a clip</h3>
+  <table>
+    <tr><td><svg class="ico" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/></svg> Loop (default)</td><td>Repeats until you press →.</td></tr>
+    <tr><td><svg class="ico" viewBox="0 0 24 24"><path d="M3 11h11V7l5 5-5 5v-4H3zM20 5h2v14h-2z"/></svg> Once</td><td>Plays once and holds the last frame.</td></tr>
+    <tr><td><svg class="ico" viewBox="0 0 24 24"><path d="M5 6l6 6-6 6-1.4-1.4L8.2 12 3.6 7.4zM13 6l6 6-6 6-1.4-1.4 4.6-4.6-4.6-4.6z"/></svg> Trans</td><td>Moves on to the next clip by itself.</td></tr>
+  </table>
+  <p>Presentation clickers usually send PageDown / PageUp, so they work too. Drag a thumbnail to reorder the playlist.
+     Tick the boxes on the left to edit several clips at once: changing the status or deleting one selected clip
+     applies to all selected clips (reordering is off while more than one is selected).
+     In fullscreen, the playback buttons appear when the mouse is over the bottom of the screen.</p>
+  <form method="dialog" class="actions"><button>Close</button></form>
+</dialog>
+
+<dialog id="dlg-autoimport">
+  <h3>Import playlist?</h3>
+  <p id="autoimport-text"></p>
+  <form method="dialog" class="actions">
+    <button value="import">Import</button>
+    <button value="no">Not now</button>
+  </form>
+</dialog>
+
+<dialog id="dlg-about">
+  <h3>ProList Player 3.0</h3>
+  <p>A simple player for local presentation videos. The playlist is saved in this browser automatically;
+     use <b>Playlist → Export…</b> to save it as <code>playlist.js</code>. Playlists store only file names.
+     Put <code>playlist.js</code> next to this HTML file and the player offers to import it whenever its playlist is empty.</p>
+  <p>When a playlist loads, each video is looked for in the player's folder and the subfolders right below it
+     (the first file with that name wins). Videos that aren't there can be found with <b>Locate folder…</b> or
+     <b>Locate files…</b>; those stay available until the page is closed.</p>
+  <p>Keep the <code>css/</code> and <code>js/</code> folders next to this HTML file.</p>
+  <form method="dialog" class="actions"><button>Close</button></form>
+</dialog>
+
+<script src="js/paths.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/media.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

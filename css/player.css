@@ -1,0 +1,145 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font: 14px system-ui, sans-serif; background: #1e1e1e; color: #ddd; display: flex; flex-direction: column; }
+button { background: #3a3a3a; color: #eee; border: 1px solid #555; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; white-space: nowrap; }
+button:hover { background: #4a4a4a; }
+button.sm { padding: 0 7px; }
+[hidden] { display: none !important; }
+
+/* menu bar */
+#menubar { display: flex; gap: 2px; align-items: center; padding: 4px 8px; background: #2a2a2a; border-bottom: 1px solid #000; }
+#menubar .spacer { flex: 1; }
+#menubar > button { margin-left: 6px; }
+.menu { position: relative; }
+.menu-btn { background: transparent; border: 1px solid transparent; padding: 5px 10px; }
+.menu.open .menu-btn, .menu-btn:hover { background: #3a3a3a; }
+.menu-items { display: none; position: absolute; top: 100%; left: 0; min-width: 210px; background: #2d2d2d; border: 1px solid #555;
+              box-shadow: 0 4px 12px rgba(0,0,0,.5); padding: 4px 0; z-index: 10; }
+.menu.open .menu-items { display: block; }
+.menu-items button { display: block; width: 100%; text-align: left; background: none; border: none; border-radius: 0; padding: 6px 14px; }
+.menu-items button:hover { background: #1d4f7a; }
+.menu-items hr { border: none; border-top: 1px solid #444; margin: 4px 0; }
+.bar { padding: 6px 10px; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+#banner { background: #6b4a00; color: #fff; }
+#missingbar { background: #4a3d10; color: #fff; }
+
+/* sidebar (playlist) toggle */
+.icon-btn { background: transparent; border: 1px solid transparent; padding: 4px 6px; margin-right: 6px; line-height: 0; }
+.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: #aaa; stroke-width: 2; }
+.icon-btn:hover { background: #3a3a3a; }
+.icon-btn.on svg { stroke: #4af; }
+body.noside #side, body.noside #splitter { display: none; }
+
+main { flex: 1; display: flex; min-height: 0; }
+
+/* playlist */
+#side { width: 420px; flex: none; display: flex; flex-direction: column; background: #252525; }
+#splitter { width: 6px; flex: none; cursor: col-resize; background: #111; touch-action: none; }
+#splitter:hover, #splitter.dragging { background: #4af; }
+#list { flex: 1; overflow-y: auto; margin: 0; padding: 0 0 72px; list-style: none; }   /* empty space at the end to drop onto */
+#list li { display: flex; gap: 10px; align-items: center; padding: 6px 8px; border-bottom: 1px solid #333; cursor: pointer; }
+#list li:hover { background: #2e2e2e; }
+#list li.current { background: #1d4f7a; }
+#list li.drop-before { box-shadow: inset 0 3px 0 #4af; }
+#list li.drop-after { box-shadow: inset 0 -3px 0 #4af; }
+.thumb { width: 96px; height: 54px; flex: none; background: #000; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #666;
+         cursor: grab; touch-action: none; user-select: none; }
+.thumb canvas { width: 100%; height: 100%; display: block; }
+.body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.line1 { display: flex; gap: 6px; align-items: baseline; }
+.num { color: #888; }
+.name { flex: 1 1 45%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.dur { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #999; font-size: 12px; white-space: nowrap; }
+li.picked .dur { color: #e0b030; }
+li.missing .name, li.missing .dur { color: #f66; }
+.line2 { display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.line2 label { white-space: nowrap; cursor: pointer; }
+.line2 .spacer { flex: 1; }
+#empty { padding: 20px; color: #888; line-height: 1.5; }
+
+/* preview */
+#right { flex: 1; display: flex; flex-direction: column; min-width: 0; padding: 16px; gap: 10px; }
+#stage { flex: 1; position: relative; container-type: inline-size; background: #000; min-height: 0; overflow: hidden; }
+/* No background on the videos: until a video has drawn its picture it is see-through, so whatever is
+   underneath (the previous clip, or the black stage) shows instead of a black flash. */
+/* The next clip loads in a hidden video; the old clip (.leaving) stays visible underneath the new one until the
+   new one has drawn its first frame. */
+#stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; visibility: hidden; }
+#stage video.show { visibility: visible; z-index: 2; }
+#stage video.leaving { visibility: visible; z-index: 1; }
+#stage.nocursor { cursor: none; }
+#stage-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #666; z-index: 3; pointer-events: none; }
+#bar { display: flex; gap: 8px; align-items: center; }
+
+/* playback buttons over the bottom of the video: always shown in the editor; in fullscreen only while the
+   mouse is over the bottom strip, and gone the moment it leaves */
+#controls { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; z-index: 5;
+            display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
+#controls .pill { display: flex; flex-direction: column; gap: 8px; max-width: calc(100% - 16px); align-items: center; padding: 8px 16px; border-radius: 40px;
+                  background: rgba(0,0,0,.45); }
+#stage:fullscreen #controls .pill { visibility: hidden; }
+#stage:fullscreen #controls:hover .pill, #stage:fullscreen #controls.dragging .pill { visibility: visible; }
+button.round { width: clamp(30px, 3.4vw, 44px); height: clamp(30px, 3.4vw, 44px); padding: 0; flex: none; border-radius: 50%; border: 2px solid rgba(255,255,255,.85);
+               background: transparent; color: #fff; display: flex; align-items: center; justify-content: center; }
+button.round.big { width: clamp(36px, 4.2vw, 54px); height: clamp(36px, 4.2vw, 54px); }
+button.round:hover { background: rgba(255,255,255,.15); }
+button.round svg { width: 55%; height: 55%; fill: currentColor; }
+#btn-play .i-pause, #btn-play.playing .i-play { display: none; }
+#btn-play.playing .i-pause { display: block; }
+#btn-fullscreen .i-exit, #btn-fullscreen.active .i-enter { display: none; }
+#btn-fullscreen.active .i-exit { display: block; }
+#controls .sep { width: 1px; height: 30px; background: rgba(255,255,255,.35); }
+
+/* status icons in the playlist (one is on) and selection boxes */
+.modes { display: flex; gap: 4px; }
+button.mode { padding: 2px; background: none; border: 1px solid transparent; border-radius: 4px; line-height: 0; }
+button.mode svg { width: 20px; height: 20px; fill: #777; }
+button.mode:hover svg { fill: #bbb; }
+button.mode.on { border-color: #4af; }
+button.mode.on svg { fill: #4af; }
+.sel { flex: none; width: 16px; height: 16px; margin: 0; cursor: pointer; }
+#list li.selected { box-shadow: inset 3px 0 0 #4af; }
+.thumb.nodrag { cursor: default; }
+button:disabled { opacity: .4; cursor: default; }
+button:disabled:hover { background: #3a3a3a; }
+.menu-items button:disabled:hover { background: none; }
+svg.ico { width: 18px; height: 18px; fill: #4af; vertical-align: middle; }
+
+/* pause icon: flashes at the bottom left of the picture, then fades out */
+#pause-icon { position: absolute; left: 16px; bottom: 16px; z-index: 4; width: clamp(36px, 5vw, 72px); aspect-ratio: 1;
+              border-radius: 10%; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; }
+#pause-icon::before, #pause-icon::after { content: ''; position: absolute; top: 25%; height: 50%; width: 14%; background: #fff; border-radius: 2px; }
+#pause-icon::before { left: 30%; }
+#pause-icon::after { right: 30%; }
+#pause-icon.flash { animation: pause-flash 1s ease-out forwards; }
+@keyframes pause-flash { 0% { opacity: 0; } 10% { opacity: 1; } 45% { opacity: 1; } 100% { opacity: 0; } }
+#info { margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#state { margin-left: auto; color: #9c9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#state.err { color: #f66; }
+
+/* dialogs */
+dialog { background: #2a2a2a; color: #ddd; border: 1px solid #555; border-radius: 6px; min-width: 440px; max-width: 600px; padding: 16px 20px; }
+dialog::backdrop { background: rgba(0,0,0,.5); }
+dialog h3 { margin: 0 0 10px; }
+dialog p { line-height: 1.5; }
+dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+dialog .actions form { margin: 0; }
+dialog input[type=text] { width: 100%; background: #111; color: #eee; border: 1px solid #555; border-radius: 4px; padding: 6px 8px; font: inherit; }
+dialog table { border-collapse: collapse; width: 100%; }
+dialog td { padding: 5px 8px; border-bottom: 1px solid #3a3a3a; vertical-align: top; }
+dialog td:first-child { white-space: nowrap; }
+kbd { background: #333; border: 1px solid #555; border-radius: 3px; padding: 0 5px; font: 12px monospace; }
+
+/* playback buttons row, and the seek bar (centered) with volume to its right */
+#controls .buttons { display: flex; gap: clamp(6px, 1.1vw, 14px); align-items: center; justify-content: center; }
+#controls .seekrow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+#controls .seekrow .left { justify-self: end; }
+#controls .seekrow .right { justify-self: start; display: flex; align-items: center; gap: 6px; }
+#controls .time { font: 12px monospace; color: #eee; }
+#seek { width: clamp(90px, 38cqw, 520px); accent-color: #4af; margin: 0; cursor: pointer; }
+#volume { width: clamp(50px, 9cqw, 100px); accent-color: #4af; margin: 0; cursor: pointer; }
+.vol-btn { background: none; border: none; padding: 2px; line-height: 0; }
+.vol-btn:hover { background: rgba(255,255,255,.15); }
+.vol-btn svg { width: 18px; height: 18px; fill: #fff; }
+.vol-btn .i-mute, .vol-btn.muted .i-vol { display: none; }
+.vol-btn.muted .i-mute { display: block; }
